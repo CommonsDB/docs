@@ -11,17 +11,11 @@
   
       "signature":       { "@id": "lic:signature", "@type": "xsd:string" },
       "tsaSignature":    { "@id": "lic:tsaSignature", "@type": "xsd:string" },
-      "storageID":       { "@id": "lic:storageID", "@type": "xsd:string" },
       "declarationID":   { "@id": "lic:declarationID", "@type": "xsd:string" },
       "entryID":         { "@id": "lic:entryId", "@type": "xsd:string" },
-      "redirect":        { "@id": "lic:redirect", "@type": "@id" },
-      "regId":           { "@id": "lic:regID", "@type": "xsd:string" },
       "declarerDid":     { "@id": "lic:declarerDid", "@type": "@id" },
       "pdRationale":     { "@id": "lic:pdRationale", "@type": "xsd:string" },
-      "certificates":    { "@id": "lic:certificates", "@type": "xsd:string" },
-      "x5cHeader":       { "@id": "lic:x5cHeader", "@type": "xsd:string" },
       "jwt":             { "@id": "lic:jwt", "@type": "xsd:string" },
-      "original":        { "@id": "http://purl.org/iscc/terms/original", "@type": "@id" },
   
       "iscc":            { "@id": "iscc:#iscc", "@type": "xsd:string" },
       "mode":            { "@id": "iscc_schema:#mode", "@type": "xsd:string" },
@@ -40,7 +34,6 @@
       "thumbnail":       { "@id": "schema:thumbnailUrl", "@type": "@id" },
       "location":        { "@id": "schema:url", "@type": "@id" },
       "schema":          { "@id": "schema:schema", "@type": "@id" },
-      "schemaVersion":   { "@id": "schema:schemaVersion", "@type": "xsd:string" },
       "version":         { "@id": "schema:version", "@type": "xsd:string" },
       "steward":         { "@id": "schema:provider", "@type": "@id" },
   
