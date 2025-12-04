@@ -8,7 +8,6 @@
       "cred": "https://www.w3.org/2018/credentials/#",
       "lic": "https://w3id.org/liccium/ont/",
       "@iscc": "https://schema.iscc.codes/terms/",
-      "iscc_schema": "https://schema.iscc.codes/schema/",
   
       "signature":       { "@id": "lic:signature", "@type": "xsd:string" },
       "tsaSignature":    { "@id": "lic:tsaSignature", "@type": "xsd:string" },
