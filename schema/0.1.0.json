@@ -8,14 +8,10 @@
     "required": [
       "signature",
       "tsaSignature",
-      "storageID",
       "declarationID",
       "iscc",
       "thumbnail",
       "declarerDid",
-      "regId",
-      "certificates",
-      "x5cHeader",
       "proof",
       "jwt",
       "issuer",
@@ -35,11 +31,6 @@
       "tsaSignature": {
         "type": "string",
         "description": "Timestamp authority signature over a hash or document, typically RFC 3161-compliant."
-      },
-  
-      "storageID": {
-        "type": "string",
-        "description": "ID of the storage."
       },
   
       "declarationID": {
@@ -84,31 +75,13 @@
         "x-explanation": "Base64-encoded image embedded as a Data URI, typically a small preview of the original content."
       },
   
-      "redirect": {
-        "type": "string",
-        "format": "uri",
-        "description": "A URL where users should be directed."
-      },
-  
       "Location": {
         "type": "string",
         "format": "uri",
         "description": "URL of the item.",
         "x-explanation": "The location where the resource can be obtained or the identifier of the resource."
       },
-  
-      "original": {
-        "type": "boolean",
-        "description": "The signee of the declaring transaction claims to be the original creator of the work manifested by the identified digital content.",
-        "x-explanation": "Indicates whether the declaring party claims to be the original creator or rightsholder of the content."
-      },
-  
-      "schemaVersion": {
-        "type": "string",
-        "description": "Indicates (by URL or string) a particular version of a schema used in some CreativeWork.",
-        "x-explanation": "Version of the declaration or metadata schema."
-      },
-  
+
       "entryID": {
         "type": "string",
         "description": "Unique identifier for the entry from the declaring party, could be a UUID."
@@ -133,25 +106,10 @@
         "description": "Decentralised identifier for the person or system making the declaration."
       },
   
-      "regId": {
-        "type": "string",
-        "description": "Identifier of the registry instance in which the declaration is stored."
-      },
-  
       "declarationIdVersion": {
         "type": "string",
         "description": "The version of the CreativeWork embodied by a specified resource.",
         "x-explanation": "Version of the declarationID."
-      },
-  
-      "certificates": {
-        "type": "string",
-        "description": "A Base64-encoded X.509 certificate used to verify the declaration signature."
-      },
-  
-      "x5cHeader": {
-        "type": "string",
-        "description": "Base64-encoded certificate from the JWS x5c header field."
       },
   
       "proof": {
