@@ -1,0 +1,594 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/commonsdb/schema/0.2.0.json",
+  "title": "CommonsDB Declaration Schema 0.2.0",
+  "description": "JSON Schema for the complete CommonsDB declaration request payload including signatures, metadata, and optional registry data.",
+  "type": "object",
+
+  "required": [
+    "signature",
+    "tsaSignature",
+    "declarationMetadata"
+  ],
+
+  "properties": {
+    "signature": {
+      "type": "string",
+      "description": "JWT signature over the declaration data. Contains the cryptographic proof signed by the declarer's private key.",
+      "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+    },
+
+    "tsaSignature": {
+      "$ref": "#/$defs/TsaSignature",
+      "description": "Timestamp Authority (TSA) signature for the main declaration signature. RFC 3161 compliant."
+    },
+
+    "commonsDbRegistrySignature": {
+      "type": "string",
+      "description": "JWT signature for CommonsDB registry data. Required if commonsDbRegistry is provided.",
+      "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+    },
+
+    "commonsDbRegistryTsaSignature": {
+      "$ref": "#/$defs/TsaSignature",
+      "description": "TSA timestamp signature for CommonsDB registry signature. Required if commonsDbRegistry is provided."
+    },
+
+    "declarationMetadata": {
+      "$ref": "#/$defs/DeclarationMetadata",
+      "description": "The main declaration metadata container."
+    },
+
+    "metaInternal": {
+      "type": "object",
+      "description": "Internal metadata added by the system (read-only, not provided by client).",
+      "properties": {
+        "companyId": { "type": "string" },
+        "declarerId": { "type": "string" },
+        "isccCode": { "type": "string" },
+        "rayId": { "type": "string" },
+        "cidV1": { "type": "string" }
+      }
+    }
+  },
+
+  "dependentRequired": {
+    "commonsDbRegistrySignature": ["commonsDbRegistryTsaSignature"],
+    "commonsDbRegistryTsaSignature": ["commonsDbRegistrySignature"]
+  },
+
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "declarationMetadata": {
+            "properties": {
+              "commonsDbRegistry": { "type": "object" }
+            },
+            "required": ["commonsDbRegistry"]
+          }
+        }
+      },
+      "then": {
+        "required": ["commonsDbRegistrySignature", "commonsDbRegistryTsaSignature"]
+      }
+    }
+  ],
+
+  "$defs": {
+    "TsaSignature": {
+      "type": "object",
+      "description": "RFC 3161 Timestamp Authority signature containing request and response.",
+      "required": ["tsr", "tsq"],
+      "properties": {
+        "tsr": {
+          "type": "string",
+          "description": "Base64-encoded Timestamp Response (TSR) from the TSA.",
+          "minLength": 1
+        },
+        "tsq": {
+          "type": "string",
+          "description": "Base64-encoded Timestamp Query (TSQ) sent to the TSA.",
+          "minLength": 1
+        }
+      }
+    },
+
+    "DeclarationMetadata": {
+      "type": "object",
+      "description": "Container for public metadata and optional registry data.",
+      "required": ["publicMetadata"],
+      "properties": {
+        "publicMetadata": {
+          "$ref": "#/$defs/PublicMetadata",
+          "description": "Public declaration metadata visible to all."
+        },
+        "commonsDbRegistry": {
+          "$ref": "#/$defs/CommonsDbRegistry",
+          "description": "Optional CommonsDB registry metadata for content registration."
+        }
+      }
+    },
+
+    "PublicMetadata": {
+      "type": "object",
+      "description": "Public metadata for the declaration. Contains schema and context URLs that define the full body structure.",
+      "required": [
+        "schema",
+        "context",
+        "iscc",
+        "name",
+        "timestamp",
+        "declarerId",
+        "credentials"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL reference to the JSON Schema document for validating the full declaration body structure.",
+          "examples": ["https://w3id.org/commonsdb/schema/0.2.0.json"]
+        },
+
+        "context": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL reference to the JSON-LD context document for semantic interoperability.",
+          "examples": ["https://w3id.org/commonsdb/context/0.2.0.json"]
+        },
+
+        "iscc": {
+          "type": "string",
+          "pattern": "^ISCC:[A-Z0-9]{4,}$",
+          "description": "An ISCC-CODE in canonical representation.",
+          "examples": ["ISCC:KAC2IJRHGCFSOVKSFF36P3BQGZBMAETBFZIPBOTJR4UBEVIHTOIJMSY"]
+        },
+
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "A name or title given to the resource/work."
+        },
+
+        "description": {
+          "type": "string",
+          "description": "An account or description of the resource/work."
+        },
+
+        "mediatype": {
+          "type": "string",
+          "description": "Media type expressed using a MIME format (e.g., image/jpeg, video/mp4).",
+          "examples": ["image/jpeg", "image/webp", "video/mp4"]
+        },
+
+        "thumbnail": {
+          "type": "string",
+          "description": "Base64-encoded thumbnail or Data URI of a preview image."
+        },
+
+        "sourceUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL where the original content can be accessed."
+        },
+
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Version number of this declaration."
+        },
+
+        "timestamp": {
+          "type": "integer",
+          "description": "Unix timestamp in milliseconds when the declaration was created.",
+          "examples": [1761634456015]
+        },
+
+        "declarerId": {
+          "type": "string",
+          "pattern": "^did:[a-z0-9]+:[a-zA-Z0-9._%-]*[a-zA-Z0-9._%-]+$",
+          "description": "DID of the person or system making the declaration.",
+          "examples": ["did:key:zXwpS3znFpTwEPepQh9pDBEXJe15DjPeCQyhJ1gv5ukdtCoHsMkSahUM1Br5Zufb7EqkzbYaGayuNqa9Yn1cRV2ECvsS"]
+        },
+
+        "credentials": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Array of verifiable credentials attesting the data supplier's authorization.",
+          "items": {
+            "$ref": "#/$defs/VerifiableCredential"
+          }
+        },
+
+        "supplierMetadata": {
+          "$ref": "#/$defs/SupplierMetadata",
+          "description": "Additional metadata provided by the data supplier."
+        }
+      }
+    },
+
+    "CommonsDbRegistry": {
+      "type": "object",
+      "description": "CommonsDB registry metadata for content registration.",
+      "required": [
+        "iscc",
+        "location",
+        "rightsStatement",
+        "timestamp",
+        "credentials"
+      ],
+      "properties": {
+        "iscc": {
+          "type": "string",
+          "pattern": "^ISCC:[A-Z0-9]{4,}$",
+          "description": "ISCC code for the registered content."
+        },
+
+        "location": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL where the content can be accessed."
+        },
+
+        "rightsStatement": {
+          "$ref": "#/$defs/RightsStatement",
+          "description": "URI indicating the copyright and reuse status (license URL)."
+        },
+
+        "timestamp": {
+          "type": "integer",
+          "description": "Unix timestamp in milliseconds for the registry entry."
+        },
+
+        "credentials": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Array of credential proofs for CommonsDB registry.",
+          "items": {
+            "$ref": "#/$defs/CommonsDbCredential"
+          }
+        }
+      }
+    },
+
+    "VerifiableCredential": {
+      "type": "object",
+      "description": "W3C Verifiable Credential attesting data supplier authorization.",
+      "required": ["id", "type", "issuer", "validFrom", "validUntil", "credentialSubject", "proof"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uri",
+          "description": "Unique identifier for the credential (URN UUID).",
+          "examples": ["urn:uuid:ec41919f-fb54-4f53-8234-d7c0f7b76828"]
+        },
+        "type": {
+          "type": "array",
+          "items": { "type": "string" },
+          "contains": { "const": "VerifiableCredential" },
+          "description": "Types of the verifiable credential."
+        },
+        "issuer": {
+          "type": "string",
+          "description": "DID of the credential issuer.",
+          "examples": ["did:web:openfuture.eu"]
+        },
+        "@context": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "JSON-LD context for the credential."
+        },
+        "validFrom": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 datetime when the credential becomes valid."
+        },
+        "validUntil": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 datetime when the credential expires."
+        },
+        "credentialSchema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "format": "uri" },
+              "type": { "type": "string" }
+            }
+          }
+        },
+        "credentialSubject": {
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "type": "string" },
+            "sameAs": { "type": "string" },
+            "dataSupplierFor": { "type": "string" }
+          }
+        },
+        "proof": {
+          "type": "object",
+          "required": ["type", "jwt"],
+          "properties": {
+            "type": { "type": "string", "const": "JwtProof2020" },
+            "jwt": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+            }
+          }
+        }
+      }
+    },
+
+    "CommonsDbCredential": {
+      "type": "object",
+      "description": "Credential proof for CommonsDB registry (simplified format).",
+      "required": ["proof"],
+      "properties": {
+        "proof": {
+          "type": "string",
+          "description": "JWT proof string for the credential.",
+          "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+        }
+      }
+    },
+
+    "SupplierMetadata": {
+      "type": "object",
+      "description": "Additional metadata provided by the data supplier.",
+      "properties": {
+        "location": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI location where the content can be accessed."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name or title from supplier's records."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description from supplier's records."
+        },
+        "creator": {
+          "type": "string",
+          "description": "Creator information from supplier's records."
+        },
+        "creationDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Creation date from supplier's records."
+        },
+        "steward": {
+          "type": "string",
+          "description": "Current steward or maintainer of the content."
+        },
+        "rightsStatement": {
+          "$ref": "#/$defs/RightsStatement",
+          "description": "Rights statement URI from supplier's records."
+        },
+        "attributionString": {
+          "type": "string",
+          "description": "Attribution text from supplier's records."
+        },
+        "pdRationale": {
+          "type": "string",
+          "description": "Public domain rationale from supplier's records."
+        }
+      }
+    },
+
+    "RightsStatement": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI indicating the copyright and reuse status. Must be one of the allowed Creative Commons or Public Domain license URLs.",
+      "enum": [
+        "https://creativecommons.org/publicdomain/mark/1.0/",
+        "https://creativecommons.org/publicdomain/zero/1.0/",
+        "https://creativecommons.org/licenses/by/1.0/",
+        "https://creativecommons.org/licenses/by/1.0/fi/",
+        "https://creativecommons.org/licenses/by/1.0/il/",
+        "https://creativecommons.org/licenses/by/1.0/nl/",
+        "https://creativecommons.org/licenses/by/2.0/",
+        "https://creativecommons.org/licenses/by/2.0/au/",
+        "https://creativecommons.org/licenses/by/2.0/at/",
+        "https://creativecommons.org/licenses/by/2.0/be/",
+        "https://creativecommons.org/licenses/by/2.0/br/",
+        "https://creativecommons.org/licenses/by/2.0/ca/",
+        "https://creativecommons.org/licenses/by/2.0/cl/",
+        "https://creativecommons.org/licenses/by/2.0/hr/",
+        "https://creativecommons.org/licenses/by/2.0/fr/",
+        "https://creativecommons.org/licenses/by/2.0/de/",
+        "https://creativecommons.org/licenses/by/2.0/it/",
+        "https://creativecommons.org/licenses/by/2.0/jp/",
+        "https://creativecommons.org/licenses/by/2.0/kr/",
+        "https://creativecommons.org/licenses/by/2.0/nl/",
+        "https://creativecommons.org/licenses/by/2.0/pl/",
+        "https://creativecommons.org/licenses/by/2.0/za/",
+        "https://creativecommons.org/licenses/by/2.0/es/",
+        "https://creativecommons.org/licenses/by/2.0/tw/",
+        "https://creativecommons.org/licenses/by/2.0/uk/",
+        "https://creativecommons.org/licenses/by/2.1/au/",
+        "https://creativecommons.org/licenses/by/2.1/ca/",
+        "https://creativecommons.org/licenses/by/2.1/jp/",
+        "https://creativecommons.org/licenses/by/2.1/es/",
+        "https://creativecommons.org/licenses/by/2.5/",
+        "https://creativecommons.org/licenses/by/2.5/ar/",
+        "https://creativecommons.org/licenses/by/2.5/au/",
+        "https://creativecommons.org/licenses/by/2.5/br/",
+        "https://creativecommons.org/licenses/by/2.5/bg/",
+        "https://creativecommons.org/licenses/by/2.5/ca/",
+        "https://creativecommons.org/licenses/by/2.5/cn/",
+        "https://creativecommons.org/licenses/by/2.5/co/",
+        "https://creativecommons.org/licenses/by/2.5/hr/",
+        "https://creativecommons.org/licenses/by/2.5/dk/",
+        "https://creativecommons.org/licenses/by/2.5/hu/",
+        "https://creativecommons.org/licenses/by/2.5/in/",
+        "https://creativecommons.org/licenses/by/2.5/il/",
+        "https://creativecommons.org/licenses/by/2.5/it/",
+        "https://creativecommons.org/licenses/by/2.5/mk/",
+        "https://creativecommons.org/licenses/by/2.5/my/",
+        "https://creativecommons.org/licenses/by/2.5/mt/",
+        "https://creativecommons.org/licenses/by/2.5/mx/",
+        "https://creativecommons.org/licenses/by/2.5/nl/",
+        "https://creativecommons.org/licenses/by/2.5/pe/",
+        "https://creativecommons.org/licenses/by/2.5/pl/",
+        "https://creativecommons.org/licenses/by/2.5/pt/",
+        "https://creativecommons.org/licenses/by/2.5/si/",
+        "https://creativecommons.org/licenses/by/2.5/za/",
+        "https://creativecommons.org/licenses/by/2.5/es/",
+        "https://creativecommons.org/licenses/by/2.5/se/",
+        "https://creativecommons.org/licenses/by/2.5/ch/",
+        "https://creativecommons.org/licenses/by/2.5/tw/",
+        "https://creativecommons.org/licenses/by/2.5/scotland/",
+        "https://creativecommons.org/licenses/by/3.0/",
+        "https://creativecommons.org/licenses/by/3.0/am/",
+        "https://creativecommons.org/licenses/by/3.0/au/",
+        "https://creativecommons.org/licenses/by/3.0/at/",
+        "https://creativecommons.org/licenses/by/3.0/az/",
+        "https://creativecommons.org/licenses/by/3.0/br/",
+        "https://creativecommons.org/licenses/by/3.0/ca/",
+        "https://creativecommons.org/licenses/by/3.0/cl/",
+        "https://creativecommons.org/licenses/by/3.0/cn/",
+        "https://creativecommons.org/licenses/by/3.0/cr/",
+        "https://creativecommons.org/licenses/by/3.0/hr/",
+        "https://creativecommons.org/licenses/by/3.0/cz/",
+        "https://creativecommons.org/licenses/by/3.0/ec/",
+        "https://creativecommons.org/licenses/by/3.0/eg/",
+        "https://creativecommons.org/licenses/by/3.0/ee/",
+        "https://creativecommons.org/licenses/by/3.0/fr/",
+        "https://creativecommons.org/licenses/by/3.0/ge/",
+        "https://creativecommons.org/licenses/by/3.0/de/",
+        "https://creativecommons.org/licenses/by/3.0/gr/",
+        "https://creativecommons.org/licenses/by/3.0/gt/",
+        "https://creativecommons.org/licenses/by/3.0/hk/",
+        "https://creativecommons.org/licenses/by/3.0/ie/",
+        "https://creativecommons.org/licenses/by/3.0/igo/",
+        "https://creativecommons.org/licenses/by/3.0/it/",
+        "https://creativecommons.org/licenses/by/3.0/lu/",
+        "https://creativecommons.org/licenses/by/3.0/nl/",
+        "https://creativecommons.org/licenses/by/3.0/nz/",
+        "https://creativecommons.org/licenses/by/3.0/no/",
+        "https://creativecommons.org/licenses/by/3.0/ph/",
+        "https://creativecommons.org/licenses/by/3.0/pl/",
+        "https://creativecommons.org/licenses/by/3.0/pt/",
+        "https://creativecommons.org/licenses/by/3.0/pr/",
+        "https://creativecommons.org/licenses/by/3.0/ro/",
+        "https://creativecommons.org/licenses/by/3.0/rs/",
+        "https://creativecommons.org/licenses/by/3.0/sg/",
+        "https://creativecommons.org/licenses/by/3.0/za/",
+        "https://creativecommons.org/licenses/by/3.0/es/",
+        "https://creativecommons.org/licenses/by/3.0/ch/",
+        "https://creativecommons.org/licenses/by/3.0/tw/",
+        "https://creativecommons.org/licenses/by/3.0/th/",
+        "https://creativecommons.org/licenses/by/3.0/ug/",
+        "https://creativecommons.org/licenses/by/3.0/us/",
+        "https://creativecommons.org/licenses/by/3.0/ve/",
+        "https://creativecommons.org/licenses/by/3.0/vn/",
+        "https://creativecommons.org/licenses/by/4.0/",
+        "https://creativecommons.org/licenses/by-sa/1.0/",
+        "https://creativecommons.org/licenses/by-sa/1.0/fi/",
+        "https://creativecommons.org/licenses/by-sa/1.0/il/",
+        "https://creativecommons.org/licenses/by-sa/1.0/nl/",
+        "https://creativecommons.org/licenses/by-sa/2.0/",
+        "https://creativecommons.org/licenses/by-sa/2.0/au/",
+        "https://creativecommons.org/licenses/by-sa/2.0/at/",
+        "https://creativecommons.org/licenses/by-sa/2.0/be/",
+        "https://creativecommons.org/licenses/by-sa/2.0/br/",
+        "https://creativecommons.org/licenses/by-sa/2.0/ca/",
+        "https://creativecommons.org/licenses/by-sa/2.0/cl/",
+        "https://creativecommons.org/licenses/by-sa/2.0/hr/",
+        "https://creativecommons.org/licenses/by-sa/2.0/fr/",
+        "https://creativecommons.org/licenses/by-sa/2.0/de/",
+        "https://creativecommons.org/licenses/by-sa/2.0/it/",
+        "https://creativecommons.org/licenses/by-sa/2.0/jp/",
+        "https://creativecommons.org/licenses/by-sa/2.0/kr/",
+        "https://creativecommons.org/licenses/by-sa/2.0/nl/",
+        "https://creativecommons.org/licenses/by-sa/2.0/pl/",
+        "https://creativecommons.org/licenses/by-sa/2.0/za/",
+        "https://creativecommons.org/licenses/by-sa/2.0/es/",
+        "https://creativecommons.org/licenses/by-sa/2.0/tw/",
+        "https://creativecommons.org/licenses/by-sa/2.0/uk/",
+        "https://creativecommons.org/licenses/by-sa/2.1/au/",
+        "https://creativecommons.org/licenses/by-sa/2.1/ca/",
+        "https://creativecommons.org/licenses/by-sa/2.1/jp/",
+        "https://creativecommons.org/licenses/by-sa/2.1/es/",
+        "https://creativecommons.org/licenses/by-sa/2.5/",
+        "https://creativecommons.org/licenses/by-sa/2.5/ar/",
+        "https://creativecommons.org/licenses/by-sa/2.5/au/",
+        "https://creativecommons.org/licenses/by-sa/2.5/br/",
+        "https://creativecommons.org/licenses/by-sa/2.5/bg/",
+        "https://creativecommons.org/licenses/by-sa/2.5/ca/",
+        "https://creativecommons.org/licenses/by-sa/2.5/cn/",
+        "https://creativecommons.org/licenses/by-sa/2.5/co/",
+        "https://creativecommons.org/licenses/by-sa/2.5/hr/",
+        "https://creativecommons.org/licenses/by-sa/2.5/dk/",
+        "https://creativecommons.org/licenses/by-sa/2.5/hu/",
+        "https://creativecommons.org/licenses/by-sa/2.5/in/",
+        "https://creativecommons.org/licenses/by-sa/2.5/il/",
+        "https://creativecommons.org/licenses/by-sa/2.5/it/",
+        "https://creativecommons.org/licenses/by-sa/2.5/mk/",
+        "https://creativecommons.org/licenses/by-sa/2.5/my/",
+        "https://creativecommons.org/licenses/by-sa/2.5/mt/",
+        "https://creativecommons.org/licenses/by-sa/2.5/mx/",
+        "https://creativecommons.org/licenses/by-sa/2.5/nl/",
+        "https://creativecommons.org/licenses/by-sa/2.5/pe/",
+        "https://creativecommons.org/licenses/by-sa/2.5/pl/",
+        "https://creativecommons.org/licenses/by-sa/2.5/pt/",
+        "https://creativecommons.org/licenses/by-sa/2.5/si/",
+        "https://creativecommons.org/licenses/by-sa/2.5/za/",
+        "https://creativecommons.org/licenses/by-sa/2.5/es/",
+        "https://creativecommons.org/licenses/by-sa/2.5/se/",
+        "https://creativecommons.org/licenses/by-sa/2.5/ch/",
+        "https://creativecommons.org/licenses/by-sa/2.5/tw/",
+        "https://creativecommons.org/licenses/by-sa/2.5/scotland/",
+        "https://creativecommons.org/licenses/by-sa/3.0/",
+        "https://creativecommons.org/licenses/by-sa/3.0/am/",
+        "https://creativecommons.org/licenses/by-sa/3.0/au/",
+        "https://creativecommons.org/licenses/by-sa/3.0/at/",
+        "https://creativecommons.org/licenses/by-sa/3.0/az/",
+        "https://creativecommons.org/licenses/by-sa/3.0/br/",
+        "https://creativecommons.org/licenses/by-sa/3.0/ca/",
+        "https://creativecommons.org/licenses/by-sa/3.0/cl/",
+        "https://creativecommons.org/licenses/by-sa/3.0/cn/",
+        "https://creativecommons.org/licenses/by-sa/3.0/cr/",
+        "https://creativecommons.org/licenses/by-sa/3.0/hr/",
+        "https://creativecommons.org/licenses/by-sa/3.0/cz/",
+        "https://creativecommons.org/licenses/by-sa/3.0/ec/",
+        "https://creativecommons.org/licenses/by-sa/3.0/eg/",
+        "https://creativecommons.org/licenses/by-sa/3.0/ee/",
+        "https://creativecommons.org/licenses/by-sa/3.0/fr/",
+        "https://creativecommons.org/licenses/by-sa/3.0/ge/",
+        "https://creativecommons.org/licenses/by-sa/3.0/de/",
+        "https://creativecommons.org/licenses/by-sa/3.0/gr/",
+        "https://creativecommons.org/licenses/by-sa/3.0/gt/",
+        "https://creativecommons.org/licenses/by-sa/3.0/hk/",
+        "https://creativecommons.org/licenses/by-sa/3.0/igo/",
+        "https://creativecommons.org/licenses/by-sa/3.0/it/",
+        "https://creativecommons.org/licenses/by-sa/3.0/ie/",
+        "https://creativecommons.org/licenses/by-sa/3.0/lu/",
+        "https://creativecommons.org/licenses/by-sa/3.0/nl/",
+        "https://creativecommons.org/licenses/by-sa/3.0/nz/",
+        "https://creativecommons.org/licenses/by-sa/3.0/no/",
+        "https://creativecommons.org/licenses/by-sa/3.0/ph/",
+        "https://creativecommons.org/licenses/by-sa/3.0/pl/",
+        "https://creativecommons.org/licenses/by-sa/3.0/pt/",
+        "https://creativecommons.org/licenses/by-sa/3.0/pr/",
+        "https://creativecommons.org/licenses/by-sa/3.0/ro/",
+        "https://creativecommons.org/licenses/by-sa/3.0/rs/",
+        "https://creativecommons.org/licenses/by-sa/3.0/sg/",
+        "https://creativecommons.org/licenses/by-sa/3.0/za/",
+        "https://creativecommons.org/licenses/by-sa/3.0/es/",
+        "https://creativecommons.org/licenses/by-sa/3.0/ch/",
+        "https://creativecommons.org/licenses/by-sa/3.0/tw/",
+        "https://creativecommons.org/licenses/by-sa/3.0/th/",
+        "https://creativecommons.org/licenses/by-sa/3.0/ug/",
+        "https://creativecommons.org/licenses/by-sa/3.0/us/",
+        "https://creativecommons.org/licenses/by-sa/3.0/ve/",
+        "https://creativecommons.org/licenses/by-sa/3.0/vn/",
+        "https://creativecommons.org/licenses/by-sa/4.0/"
+      ]
+    }
+  }
+}
