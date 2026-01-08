@@ -112,10 +112,10 @@
 
     "PublicMetadata": {
       "type": "object",
-      "description": "Public metadata for the declaration. Contains schema and context URLs that define the full body structure.",
+      "description": "Public metadata for the declaration. Contains $schema and @context URLs that define the full body structure.",
       "required": [
-        "schema",
-        "context",
+        "$schema",
+        "@context",
         "iscc",
         "name",
         "timestamp",
@@ -123,14 +123,14 @@
         "credentials"
       ],
       "properties": {
-        "schema": {
+        "$schema": {
           "type": "string",
           "format": "uri",
           "description": "URL reference to the JSON Schema document for validating the full declaration body structure.",
           "examples": ["https://w3id.org/commonsdb/schema/0.2.0.json"]
         },
 
-        "context": {
+        "@context": {
           "type": "string",
           "format": "uri",
           "description": "URL reference to the JSON-LD context document for semantic interoperability.",
