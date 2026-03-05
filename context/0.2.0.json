@@ -8,7 +8,7 @@
     "prov": "http://www.w3.org/ns/prov#",
     "security": "https://w3id.org/security#",
     "cred": "https://www.w3.org/2018/credentials/#",
-    "lic": "https://w3id.org/liccium/ont/",
+    "lic": "https://w3id.org/liccium/ont/0.2.0.ttl",
     "iscc": "https://schema.iscc.codes/terms/",
     
     "signature": {
@@ -190,26 +190,6 @@
     "metaInternal": {
       "@id": "lic:internalMetadata",
       "@type": "@id"
-    },
-    
-    "companyId": {
-      "@id": "lic:companyId",
-      "@type": "xsd:string"
-    },
-    
-    "isccCode": {
-      "@id": "lic:isccCode",
-      "@type": "xsd:string"
-    },
-    
-    "rayId": {
-      "@id": "lic:rayId",
-      "@type": "xsd:string"
-    },
-    
-    "cidV1": {
-      "@id": "lic:cidV1",
-      "@type": "xsd:string"
     }
   }
 }
