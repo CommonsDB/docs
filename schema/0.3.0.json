@@ -179,6 +179,27 @@
           "description": "Version number of this declaration."
         },
 
+        "original": {
+          "type": "boolean",
+          "description": "Whether the declared file is the original."
+        },
+
+        "redirect": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL a resolver should redirect to for this declaration."
+        },
+
+        "entryUUID": {
+          "type": "string",
+          "description": "Identifier of the entry this declaration belongs to in the declarer's system."
+        },
+
+        "supersedes": {
+          "type": "string",
+          "description": "CIDv1 identifier of an earlier declaration by the same declarer that this one supersedes."
+        },
+
         "timestamp": {
           "type": "integer",
           "description": "Unix timestamp in milliseconds when the declaration was created.",
@@ -240,6 +261,11 @@
         "timestamp": {
           "type": "integer",
           "description": "Unix timestamp in milliseconds for the registry entry."
+        },
+
+        "declarationId": {
+          "type": "string",
+          "description": "Optional identifier of the declaration in the registry."
         },
 
         "credentials": {

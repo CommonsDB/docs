@@ -29,5 +29,6 @@ Published versions are never edited; corrections are released as a new version.
 **Schema**
 
 - Unknown keys are rejected in `declarationMetadata`, `publicMetadata`, `supplierMetadata` and `commonsDbRegistry`. A misspelt key such as `supplierData` no longer passes unchecked.
+- `original`, `redirect`, `entryUUID` and `supersedes` are listed in `publicMetadata`, and `declarationId` in `commonsDbRegistry`. The declaration API accepts them and suppliers send them, but 0.2.0 did not describe them. The context maps them as well.
 - `pdRationale` must be one of the nine Wikidata copyright determination methods.
 

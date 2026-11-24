@@ -110,6 +110,31 @@
       "@id": "lic:declarerId",
       "@type": "xsd:string"
     },
+
+    "original": {
+      "@id": "lic:original",
+      "@type": "xsd:boolean"
+    },
+
+    "redirect": {
+      "@id": "lic:redirect",
+      "@type": "@id"
+    },
+
+    "entryUUID": {
+      "@id": "lic:entryID",
+      "@type": "xsd:string"
+    },
+
+    "supersedes": {
+      "@id": "dct:replaces",
+      "@type": "xsd:string"
+    },
+
+    "declarationId": {
+      "@id": "lic:declarationID",
+      "@type": "xsd:string"
+    },
     
     "rightsStatement": {
       "@id": "dct:rights",
